@@ -48,7 +48,7 @@ const DEFAULT_SETTINGS: ObDBFetcherSettings = {
 	fetchSources: [
 		{
 			name: t("Untitled"),
-			url: "https://feishu.cn/base/",
+			url: "https://feishu.cn/base/...",
 			appID: "",
 			appSecret: "",
 			path: "",
