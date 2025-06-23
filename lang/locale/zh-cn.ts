@@ -1,7 +1,7 @@
 export default {
 	Untitled: "未命名",
 	"Fetch {{name}}": "获取 {{name}}",
-	"Airtable Fetch Sources Configuration": "Airtable 数据源获取配置",
+	"Feishu Fetch Sources Configuration": "Feishu 数据源获取配置",
 	"+ Add New Fetch Source": "+ 添加新数据源",
 	"Import New Fetch Sources": "导入新数据源",
 	"Export All Fetch Sources": "导出所有数据源",
@@ -25,7 +25,7 @@ export default {
 	"Delete fetch source": "删除数据源",
 	"URL: ": "URL: ",
 	"Path: ": "路径: ",
-	"API Key: ": "API 密钥: ",
+	"APP ID: ": "App ID: ",
 	"••••••••": "••••••••", // 密码占位符通常不翻译
 	style: "样式", // 上下文可能是UI样式设置
 	"Edit Fetch Source": "编辑数据源",
@@ -33,15 +33,15 @@ export default {
 	"A descriptive name for this fetch source": "此数据源的描述性名称",
 	"Enter fetch source name": "输入数据源名称",
 	"Fetch Source URL": "数据源 URL",
-	"The Airtable URL For This Fetch Source": "此数据源的 Airtable URL",
-	"https://airtable.com/app...": "https://airtable.com/app...", // URL示例不翻译
-	"API Key": "API 密钥",
-	"Your Airtable API key": "您的 Airtable API 密钥",
-	"Enter your API key": "输入您的 API 密钥",
-	"Toggle API key visibility": "切换 API 密钥可见性",
+	"The Feishu URL For This Fetch Source": "此数据源的 Feishu URL",
+	"https://feishu.com/app...": "https://feishu.com/app...", // URL示例不翻译
+	"APP ID": "App ID",
+	"Your Feishu APP ID": "您的 Feishu App ID",
+	"Enter your APP ID": "输入您的 App ID",
+	"Toggle APP ID visibility": "切换 App ID可见性",
 	"Target Path": "目标路径",
 	"The folder path where notes will be created": "笔记将被创建的文件夹路径",
-	"e.g., My Notes/Airtable": "例如：我的笔记/Airtable",
+	"e.g., My Notes/Feishu": "例如：我的笔记/Feishu",
 	"Include in Export": "导出时包含", // 或 "包含在导出中"
 	"Whether to include this fetch source when exporting":
 		"导出时是否包含此数据源",
@@ -54,9 +54,14 @@ export default {
 	"All Finished.": "全部完成。",
 	"Got {{count}} records": "获取到 {{count}} 条记录",
 	"Notes updated today": "今日更新的笔记",
+	"Notes updated in the pas 3 days": "过去3天更新的笔记",
 	"Notes updated in the past week": "过去一周更新的笔记",
 	"Notes updated in the past two weeks": "过去两周更新的笔记",
 	"Notes updated in the past month": "过去一个月更新的笔记",
 	"All notes": "所有笔记",
 	"fetched successfully": "获取成功",
+	"APP Secret": "应用密钥",
+	"Your Feishu APP Secret": "您的飞书应用密钥",
+	"Enter your APP Secret": "输入您的应用密钥",
+	"Toggle APP Secret visibility": "切换应用密钥可见性",
 };

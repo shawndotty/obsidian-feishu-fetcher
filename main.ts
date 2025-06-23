@@ -12,6 +12,7 @@ import {
 	Vault,
 	Setting,
 	setIcon,
+	requestUrl,
 } from "obsidian";
 
 import { t } from "./lang/helpers";
@@ -31,7 +32,8 @@ declare module "obsidian" {
 interface FetchSourceSetting {
 	name: string;
 	url: string;
-	apiKey: string;
+	appID: string;
+	appSecret: string;
 	path: string;
 	id?: string;
 	willExport: boolean;
@@ -46,8 +48,9 @@ const DEFAULT_SETTINGS: ObDBFetcherSettings = {
 	fetchSources: [
 		{
 			name: t("Untitled"),
-			url: "https://example.com",
-			apiKey: "",
+			url: "https://feishu.cn/base/",
+			appID: "",
+			appSecret: "",
 			path: "",
 			willExport: true,
 		},
@@ -108,7 +111,7 @@ export default class ObDBFetcher extends Plugin {
 				callback: async () => {
 					// 实际执行操作 - 这里示例为打开URL
 
-					await new AirtableFetcher(
+					await new FeishuFetcher(
 						fetchSource,
 						this.app
 					).createOrUpdateNotesInOBFromSourceTable(fetchSource);
@@ -170,7 +173,8 @@ class FetchSourceSettingsTab extends PluginSettingTab {
 						this.plugin.settings.fetchSources.push({
 							name: "",
 							url: "",
-							apiKey: "",
+							appID: "",
+							appSecret: "",
 							path: "",
 							willExport: true,
 							id: this.plugin.generateUniqueId(), // 生成新ID
@@ -495,13 +499,13 @@ class FetchSourceSettingsTab extends PluginSettingTab {
 				});
 			}
 
-			// API Key信息（显示为星号）
-			if (fetchSource.apiKey) {
+			// App ID信息（显示为星号）
+			if (fetchSource.appID) {
 				const keyEl = cardContent.createEl("div", {
 					cls: "fetch-source-info",
 				});
 				keyEl.createEl("span", {
-					text: t("API Key: "),
+					text: t("APP ID: "),
 					cls: "info-label",
 				});
 				keyEl.createEl("span", {
@@ -706,7 +710,7 @@ class FetchSourceSettingsTab extends PluginSettingTab {
 				margin: 0;
 			}
 
-			/* Styles for API Key visibility toggle */
+			/* Styles for APP ID visibility toggle */
 			.api-key-container {
 				position: relative;
 			}
@@ -788,25 +792,25 @@ class FetchSourceEditModal extends Modal {
 			.setDesc(t("The Feishu URL For This Fetch Source"))
 			.addText((text) =>
 				text
-					.setPlaceholder(t("https://feishu.com/app..."))
+					.setPlaceholder(t("https://feishu.cn/base..."))
 					.setValue(this.fetchSource.url)
 					.onChange((value) => {
 						this.fetchSource.url = value;
 					})
 			);
 
-		// API Key设置
+		// APP ID设置
 		new Setting(container)
-			.setName(t("API Key"))
-			.setDesc(t("Your Feishu API key"))
+			.setName(t("APP ID"))
+			.setDesc(t("Your Feishu APP ID"))
 			.addText((text) => {
 				// Set initial type to password for security
 				text.inputEl.type = "password";
 
-				text.setPlaceholder(t("Enter your API key"))
-					.setValue(this.fetchSource.apiKey)
+				text.setPlaceholder(t("Enter your APP ID"))
+					.setValue(this.fetchSource.appID)
 					.onChange((value) => {
-						this.fetchSource.apiKey = value;
+						this.fetchSource.appID = value;
 					});
 
 				// Add a container for relative positioning
@@ -818,7 +822,54 @@ class FetchSourceEditModal extends Modal {
 					const visibilityBtn = container.createEl("button", {
 						cls: "visibility-toggle-btn",
 						attr: {
-							"aria-label": t("Toggle API key visibility"),
+							"aria-label": t("Toggle APP ID visibility"),
+						},
+					});
+
+					// Initial state: key is hidden, show 'eye-off' icon
+					setIcon(visibilityBtn, "eye-off");
+					let isVisible = false;
+
+					visibilityBtn.addEventListener("click", (e) => {
+						e.preventDefault();
+						isVisible = !isVisible;
+						if (isVisible) {
+							// If key is now visible, show 'eye' icon
+							text.inputEl.type = "text";
+							setIcon(visibilityBtn, "eye");
+						} else {
+							// If key is now hidden, show 'eye-off' icon
+							text.inputEl.type = "password";
+							setIcon(visibilityBtn, "eye-off");
+						}
+					});
+				}
+			});
+
+		// APP Secret设置
+		new Setting(container)
+			.setName(t("APP Secret"))
+			.setDesc(t("Your Feishu APP Secret"))
+			.addText((text) => {
+				// Set initial type to password for security
+				text.inputEl.type = "password";
+
+				text.setPlaceholder(t("Enter your APP Secret"))
+					.setValue(this.fetchSource.appSecret)
+					.onChange((value) => {
+						this.fetchSource.appSecret = value;
+					});
+
+				// Add a container for relative positioning
+				const container = text.inputEl.parentElement;
+				if (container) {
+					container.addClass("api-key-container");
+
+					// Create the visibility toggle button
+					const visibilityBtn = container.createEl("button", {
+						cls: "visibility-toggle-btn",
+						attr: {
+							"aria-label": t("Toggle APP Secret visibility"),
 						},
 					});
 
@@ -894,7 +945,7 @@ class FetchSourceEditModal extends Modal {
 	}
 }
 
-interface AirtableIds {
+interface FeishuIds {
 	baseId: string;
 	tableId: string;
 	viewId: string;
@@ -912,51 +963,73 @@ interface Record {
 	fields: RecordFields;
 }
 
-class AirtableFetcher {
-	private apiKey: string;
+class FeishuFetcher {
+	private appID: string;
+	private appSecret: string;
 	apiUrlRoot: string;
-	dataBaseIDs: AirtableIds;
+	dataBaseIDs: FeishuIds;
+	apiToken: string;
 	app: App;
 	vault: Vault;
 
 	constructor(private readonly fetchSource: FetchSourceSetting, app: App) {
-		this.apiKey = fetchSource.apiKey;
+		this.appID = fetchSource.appID;
+		this.appSecret = fetchSource.appSecret;
 		this.app = app;
 		this.vault = app.vault;
-		this.dataBaseIDs = this.extractAirtableIds(fetchSource.url);
-		this.apiUrlRoot = `https://api.feishu.com/v0/`;
+		this.dataBaseIDs = this.extractFeishuIds(fetchSource.url);
+		this.apiUrlRoot = `https://open.feishu.cn/open-apis/bitable/v1/`;
 	}
 
-	extractAirtableIds(url: string): AirtableIds {
-		// Regular expression to match Feishu URL pattern
-		const regex =
-			/https?:\/\/feishu\.com\/(app[^\/]+)\/(tbl[^\/]+)(?:\/(viw[^\/?]+))?/;
-		const match = url.match(regex);
+	extractFeishuIds(url: string): FeishuIds {
+		try {
+			const urlObj = new URL(url);
 
-		if (!match) {
 			return {
-				baseId: "",
-				tableId: "",
-				viewId: "",
+				baseId: urlObj.pathname.split("/").pop() || "",
+				tableId: new URLSearchParams(urlObj.search).get("table") || "",
+				viewId: new URLSearchParams(urlObj.search).get("view") || "",
 			};
+		} catch (error) {
+			console.error("URL解析错误:", error);
+			return { baseId: "", tableId: "", viewId: "" };
 		}
-
-		return {
-			baseId: match[1] || "",
-			tableId: match[2] || "",
-			viewId: match[3] || "",
-		};
 	}
 
-	makeApiUrl(airtableIds: AirtableIds): string {
-		return `${this.apiUrlRoot}${airtableIds.baseId}/${airtableIds.tableId}?view=${airtableIds.viewId}`;
+	makeApiUrl(feishuIds: FeishuIds): string {
+		return `${this.apiUrlRoot}apps/${feishuIds.baseId}/tables/${feishuIds.tableId}/records/search`;
+	}
+
+	async setNewApiToken() {
+		this.apiToken = await this.getNewApiToken();
+	}
+
+	async getNewApiToken() {
+		const data = {
+			app_id: this.appID,
+			app_secret: this.appSecret,
+		};
+		const url =
+			"https://open.feishu.cn/open-apis/auth/v3/app_access_token/internal/";
+
+		try {
+			const res = await requestUrl({
+				url: url,
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(data),
+			});
+
+			return res.json.app_access_token;
+		} catch (error) {
+			console.error(error.message);
+		}
 	}
 
 	async fetchData() {
-		let fields = ["Title", "MD", "SubFolder", "UpdatedIn"];
-
 		let dateFilterOption: DateFilterOption | null = null;
-		let dateFilterFormula = "";
 		const suggester = new DateFilterSuggester(this.app);
 		dateFilterOption = await new Promise<DateFilterOption>((resolve) => {
 			suggester.onChooseItem = (item) => {
@@ -965,19 +1038,25 @@ class AirtableFetcher {
 			};
 			suggester.open();
 		});
-		if (dateFilterOption && dateFilterOption.value !== 99) {
-			const formula = `{UpdatedIn} <= ${dateFilterOption.value}`;
-			dateFilterFormula = `&filterByFormula=${encodeURIComponent(
-				formula
-			)}`;
-		}
-		let url = `${this.makeApiUrl(this.dataBaseIDs)}
-			&${fields.map((f) => `fields%5B%5D=${encodeURIComponent(f)}`).join("&")}
-			${dateFilterFormula}
-			&offset=
-		`;
+		let url = this.makeApiUrl(this.dataBaseIDs);
 
-		let records = await this.getAllRecordsFromTable(url);
+		const request = {
+			view_id: this.dataBaseIDs.viewId,
+			field_names: ["Title", "MD", "SubFolder"],
+			filter: {
+				conditions: [
+					{
+						field_name: "UpdatedIn",
+						operator: "isLessEqual",
+						value: [dateFilterOption.value.toString()],
+					},
+				],
+				conjunction: "and",
+			},
+		};
+
+		let records = await this.getAllRecordsFromTable(url, request);
+		console.dir(records);
 		return records;
 	}
 
@@ -989,8 +1068,6 @@ class AirtableFetcher {
 		let notesToCreateOrUpdate: RecordFields[] = (
 			await this.fetchData()
 		).map((note: Record) => note.fields);
-
-		console.dir(notesToCreateOrUpdate);
 
 		new Notice(
 			t("There are {{count}} files needed to be updated or created.", {
@@ -1061,38 +1138,79 @@ class AirtableFetcher {
 		}
 	}
 
-	async getAllRecordsFromTable(url: string): Promise<any> {
+	async getAllRecordsFromTable(url: string, request: any): Promise<any[]> {
 		let records: any[] = [];
-		let offset = "";
+		let hasMore = false;
+		await this.setNewApiToken();
 
 		do {
 			try {
-				// 使用 fetch 替换 requestUrl
-				const response = await fetch(url + offset, {
-					method: "GET",
+				let queryUrl = url;
+				const requestConfig = {
+					url: queryUrl,
+					method: "POST",
 					headers: {
-						Authorization: `Bearer ${this.apiKey}`,
+						"Content-Type": "application/json",
+						Authorization: "Bearer " + this.apiToken,
 					},
-				});
-				// fetch 返回的是 Response 对象，需要调用 .json() 获取数据
-				const responseData = await response.json();
-				// 为了兼容后续代码，将 responseData 包装成与 requestUrl 返回结构一致
-				const responseObj = { json: responseData };
+					body: JSON.stringify(request),
+				};
+				const response = await requestUrl(requestConfig);
 
-				const data = responseObj.json;
-				records = records.concat(data.records);
-				new Notice(
-					t("Got {{count}} records", {
-						count: records.length.toString(),
-					})
-				);
+				if (response.json.error) {
+					new Notice(response.json.error.message);
+				} else {
+					const data = response.json;
+					records = records.concat(data.data.items);
 
-				offset = data.offset || "";
+					hasMore = data.data.has_more || false;
+				}
 			} catch (error) {
-				console.dir(error);
+				new Notice(error.message);
+				hasMore = false;
 			}
-		} while (offset !== "");
+		} while (hasMore);
 
+		return this.reformatRecords(records);
+	}
+
+	reformatRecords(records: any[]): any[] {
+		if (!Array.isArray(records) || records.length === 0) {
+			return [];
+		}
+		for (let index = 0; index < records.length; index++) {
+			const fields = records[index]?.fields;
+			if (!fields) continue;
+			for (const [key, value] of Object.entries(fields)) {
+				// 处理 value 是数组且第一个元素是对象且 type 为 "text"
+				if (
+					Array.isArray(value) &&
+					value.length > 0 &&
+					typeof value[0] === "object" &&
+					value[0] !== null &&
+					"text" === (value[0] as any).type
+				) {
+					records[index].fields[key] = (value[0] as any).text;
+				}
+				// 处理 value 是对象且 type 为 1，且 value.value 是数组
+				else if (
+					value !== null &&
+					typeof value === "object" &&
+					"value" in value &&
+					"type" in value &&
+					(value as any).type === 1 &&
+					Array.isArray((value as any).value) &&
+					(value as any).value.length > 0 &&
+					typeof (value as any).value[0] === "object" &&
+					(value as any).value[0] !== null &&
+					"text" in (value as any).value[0]
+				) {
+					records[index].fields[key] = (value as any).value[0].text;
+				} else {
+					records[index].fields[key] = value;
+				}
+			}
+		}
 		return records;
 	}
 }
@@ -1107,21 +1225,26 @@ class DateFilterSuggester extends FuzzySuggestModal<DateFilterOption> {
 	private options: DateFilterOption[] = [
 		{ id: "day", name: `1. ${t("Notes updated today")}`, value: 1 },
 		{
+			id: "threeDays",
+			name: `2. ${t("Notes updated in the pas 3 days")}`,
+			value: 3,
+		},
+		{
 			id: "week",
-			name: `2. ${t("Notes updated in the past week")}`,
+			name: `3. ${t("Notes updated in the past week")}`,
 			value: 7,
 		},
 		{
 			id: "twoWeeks",
-			name: `3. ${t("Notes updated in the past two weeks")}`,
+			name: `4. ${t("Notes updated in the past two weeks")}`,
 			value: 14,
 		},
 		{
 			id: "month",
-			name: `4. ${t("Notes updated in the past month")}`,
+			name: `5. ${t("Notes updated in the past month")}`,
 			value: 30,
 		},
-		{ id: "all", name: `5. ${t("All notes")}`, value: 99 },
+		{ id: "all", name: `6. ${t("All notes")}`, value: 9999 },
 	];
 
 	getItems(): DateFilterOption[] {

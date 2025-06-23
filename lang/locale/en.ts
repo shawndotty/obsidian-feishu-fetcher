@@ -1,8 +1,7 @@
 export default {
 	Untitled: "Untitled",
 	"Fetch {{name}}": "Fetch {{name}}",
-	"Airtable Fetch Sources Configuration":
-		"Airtable Fetch Sources Configuration",
+	"Feishu Fetch Sources Configuration": "Feishu Fetch Sources Configuration",
 	"+ Add New Fetch Source": "+ Add New Fetch Source",
 	"Import New Fetch Sources": "+ Import New Fetch Sources",
 	"Export All Fetch Sources": "Export All Fetch Sources",
@@ -33,7 +32,7 @@ export default {
 	"Delete fetch source": "Delete fetch source",
 	"URL: ": "URL: ",
 	"Path: ": "Path: ",
-	"API Key: ": "API Key: ",
+	"APP ID: ": "APP ID: ",
 	"••••••••": "••••••••",
 	style: "style",
 	"Edit Fetch Source": "Edit Fetch Source",
@@ -42,17 +41,17 @@ export default {
 		"A descriptive name for this fetch source",
 	"Enter fetch source name": "Enter fetch source name",
 	"Fetch Source URL": "Fetch Source URL",
-	"The Airtable URL For This Fetch Source":
-		"The Airtable URL For This Fetch Source",
-	"https://airtable.com/app...": "https://airtable.com/app...",
-	"API Key": "API Key",
-	"Your Airtable API key": "Your Airtable API key",
-	"Enter your API key": "Enter your API key",
-	"Toggle API key visibility": "Toggle API key visibility",
+	"The Feishu URL For This Fetch Source":
+		"The Feishu URL For This Fetch Source",
+	"https://feishu.cn/base...": "https://feishu.cn/base...",
+	"APP ID": "APP ID",
+	"Your Feishu APP ID": "Your Feishu APP ID",
+	"Enter your APP ID": "Enter your APP ID",
+	"Toggle APP ID visibility": "Toggle APP ID visibility",
 	"Target Path": "Target Path",
 	"The folder path where notes will be created":
 		"The folder path where notes will be created",
-	"e.g., My Notes/Airtable": "e.g., My Notes/Airtable",
+	"e.g., My Notes/Feishu": "e.g., My Notes/Feishu",
 	"Include in Export": "Include in Export",
 	"Whether to include this fetch source when exporting":
 		"Whether to include this fetch source when exporting",
@@ -65,10 +64,15 @@ export default {
 	"All Finished.": "All Finished.",
 	"Got {{count}} records": "Got {{count}} records",
 	"Notes updated today": "Notes updated today",
+	"Notes updated in the pas 3 days": "Notes updated in the pas 3 days",
 	"Notes updated in the past week": "Notes updated in the past week",
 	"Notes updated in the past two weeks":
 		"Notes updated in the past two weeks",
 	"Notes updated in the past month": "Notes updated in the past month",
 	"All notes": "All notes",
 	"fetched successfully": "fetched successfully",
+	"APP Secret": "APP Secret",
+	"Your Feishu APP Secret": "Your Feishu APP Secret",
+	"Enter your APP Secret": "Enter your APP Secret",
+	"Toggle APP Secret visibility": "Toggle APP Secret visibility",
 };

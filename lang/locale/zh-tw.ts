@@ -25,7 +25,7 @@ export default {
 	"Delete fetch source": "刪除數據源",
 	"URL: ": "URL: ",
 	"Path: ": "路徑: ",
-	"API Key: ": "API 密鑰: ",
+	"APP ID: ": "App ID: ",
 	"••••••••": "••••••••", // 密碼佔位符通常不翻譯
 	style: "樣式", // 上下文可能是UI樣式設置
 	"Edit Fetch Source": "編輯數據源",
@@ -35,10 +35,10 @@ export default {
 	"Fetch Source URL": "數據源 URL",
 	"The Feishu URL For This Fetch Source": "此數據源的 Feishu URL",
 	"https://feishu.com/app...": "https://feishu.com/app...", // URL示例不翻譯
-	"API Key": "API 密鑰",
-	"Your Feishu API key": "您的 Feishu API 密鑰",
-	"Enter your API key": "輸入您的 API 密鑰",
-	"Toggle API key visibility": "切換 API 密鑰可見性",
+	"APP ID": "App ID",
+	"Your Feishu APP ID": "您的 Feishu App ID",
+	"Enter your APP ID": "輸入您的 App ID",
+	"Toggle APP ID visibility": "切換 App ID可見性",
 	"Target Path": "目標路徑",
 	"The folder path where notes will be created": "筆記將被創建的文件夾路徑",
 	"e.g., My Notes/Feishu": "例如：我的筆記/Feishu",
@@ -54,9 +54,14 @@ export default {
 	"All Finished.": "全部完成。",
 	"Got {{count}} records": "獲取到 {{count}} 條記錄",
 	"Notes updated today": "今日更新的筆記",
+	"Notes updated in the pas 3 days": "過去3天更新的筆記",
 	"Notes updated in the past week": "過去一週更新的筆記",
 	"Notes updated in the past two weeks": "過去兩週更新的筆記",
 	"Notes updated in the past month": "過去一個月更新的筆記",
 	"All notes": "所有筆記",
 	"fetched successfully": "獲取成功",
+	"APP Secret": "應用密鑰",
+	"Your Feishu APP Secret": "您的飛書應用密鑰",
+	"Enter your APP Secret": "輸入您的應用密鑰",
+	"Toggle APP Secret visibility": "切換應用密鑰可見性",
 };
