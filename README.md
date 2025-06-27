@@ -12,6 +12,7 @@ An Obsidian plugin that fetches data from Feishu Bitable and automatically creat
     -   Uses the content of the `MD` field as the note's body.
     -   Supports placing notes in specific subfolders using the `SubFolder` field.
     -   Supports customizing the file extension of notes via the `Extension` field (defaults to `.md`).
+    -   Uses the `UpdatedIn` field content to provide date filtering when fetching notes.
 -   **Incremental Updates**: Fetches data based on the last updated time of a record to avoid redundant processing.
 -   **Simple Configuration UI**: Provides a graphical interface to manage all data sources, with support for importing and exporting configurations for easy migration.
 -   **Command Palette Integration**: Automatically creates a fetch command for each data source for quick access.
@@ -31,7 +32,7 @@ On the Feishu side, you need to create a custom application and a Bitable for sy
 You need a custom app with permissions to read Bitables to fetch data.
 
 1.  Visit the [Feishu Open Platform](https://open.feishu.cn/app) and log in.
-2.  Click **Create App** and select **Custom App**.
+2.  Click **Create App** and select **Enterprise Custom App**.
 3.  Fill in the app name (e.g., "Obsidian Sync Helper") and description.
 4.  On the **Permissions** page of your app, search for and enable the following permission:
     -   `bitable:app_table:readonly`: Read records from the Bitable.
@@ -48,11 +49,14 @@ This will be your data source. You need to create a table and set up the necessa
     -   `MD` (Type: `Text`): The main content of the note, supporting Markdown format.
     -   `SubFolder` (Type: `Text`, Optional): The subfolder path for the note. For example, `Journal/2025` will save the note to `[Your Target Path]/Journal/2025`.
     -   `Extension` (Type: `Text`, Optional): The file extension for the note. Defaults to `md` if left empty.
-    -   `UpdatedIn` (Type: `Last Modified Time`): Used for incremental sync. The plugin uses this timestamp to determine which notes need updating.
+    -   `UpdatedIn` (Type: `Formula Field`): Used for incremental sync. The plugin uses this timestamp to determine which notes need updating.
+        -   For example, you can have a date field named `Note Update Date`.
+        -   Then, in the `UpdatedIn` field, use `DATEDIF(TODAY(),[Note Update Date],"days")` to get how many days ago the note was last updated.
 
 3.  **Authorize the Table**:
-    -   Click the **App** icon in the upper-right corner of the table.
-    -   Select **Add App** from the dropdown menu.
+    -   Click the **···** icon in the upper-right corner of the table.
+    -   Select **More** from the appearing panel.
+    -   Select **Add Document App** from the pop-up menu.
     -   Search for and select the custom app you just created, and ensure it has **Editable** permissions (although the plugin only reads, Feishu's authorization mechanism requires this setting).
 
 4.  **Copy the Table Link**:
@@ -75,19 +79,19 @@ This will be your data source. You need to create a table and set up the necessa
 
 1.  Enable the Feishu Fetcher plugin in Obsidian.
 2.  Open the plugin settings page.
-3.  Click **+ Add New Fetch Source** to create a new data source.
+3.  Click **+ Add New Data Source** to create a new data source.
 4.  In the edit modal that appears, fill in the following information:
-    -   **Fetch Source Name**: Give your data source a descriptive name (e.g., "My Reading Notes"). This name will appear in the command palette.
-    -   **Fetch Source URL**: Paste the Bitable link you copied earlier.
+    -   **Data Source Name**: Give your data source a descriptive name (e.g., "My Reading Notes"). This name will appear in the command palette.
+    -   **Data Source URL**: Paste the Bitable link you copied earlier.
     -   **APP ID**: Paste your custom app's App ID.
-    -   **APP Secret**: Paste your custom app's App Secret.
+    -   **App Secret**: Paste your custom app's App Secret.
     -   **Target Path**: Set a folder path in your Obsidian vault where notes fetched from Feishu will be stored (e.g., `Feishu Notes`). The plugin will create the folder if it doesn't exist.
 5.  Click **Save** to save the settings.
 
 ### (III) How to Use
 
 1.  Press `Ctrl+P` (or `Cmd+P`) to open the Obsidian command palette.
-2.  Search for "Feishu Fetcher," and you will see commands generated for each of your configured data sources, in the format `Fetch [Your Data Source Name]`.
+2.  Search for "Feishu Fetcher," and you will see commands generated for each of your configured data sources, in the format `Get [Your Data Source Name]`.
 3.  Select the command for the data source you want to sync and press Enter.
 4.  The plugin will prompt you to select an update time range (e.g., "Notes updated in the last day" or "All notes").
 5.  After selection, the plugin will start fetching data and create or update notes in the specified target path.
