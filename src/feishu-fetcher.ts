@@ -1,6 +1,6 @@
 import { App, Vault, Notice, normalizePath, requestUrl } from "obsidian";
 import { FetchSourceSetting, FeishuIds, RecordFields, Record } from "./types";
-import { t } from "./lang/helpers";
+import { t } from "../lang/helpers";
 import { DateFilterOption } from "./types";
 import { DateFilterSuggester } from "./suggesters";
 
