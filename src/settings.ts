@@ -7,6 +7,7 @@ import {
 	setIcon,
 } from "obsidian";
 import { t } from "../lang/helpers";
+import { encodeBase64, decodeBase64 } from "./utils";
 import { FetchSourceSetting } from "./types";
 import ObDBFetcher from "../main";
 import { FetchSourceEditModal } from "./modals";
@@ -78,10 +79,22 @@ class FetchSourceSettingsTab extends PluginSettingTab {
 						// 导出所有fetchSources设置
 						const fetchSourcesToExport =
 							this.plugin.settings.fetchSources.map(
-								(fetchSource) => {
+								(fetchSource: FetchSourceSetting) => {
 									// 创建fetchSource的副本并移除id
 									const fetchSourceCopy = { ...fetchSource };
 									delete fetchSourceCopy.id;
+									// 导出时apiKey进行base64编码
+									if (fetchSourceCopy.appID) {
+										fetchSourceCopy.appID = encodeBase64(
+											fetchSourceCopy.appID
+										);
+									}
+									if (fetchSourceCopy.appSecret) {
+										fetchSourceCopy.appSecret =
+											encodeBase64(
+												fetchSourceCopy.appSecret
+											);
+									}
 									return fetchSourceCopy;
 								}
 							);
@@ -194,6 +207,13 @@ class FetchSourceSettingsTab extends PluginSettingTab {
 				if (!fetchSource.id) {
 					fetchSource.id = this.plugin.generateUniqueId();
 				}
+				// 导入时apiKey进行base64解码
+				if (fetchSource.appID) {
+					fetchSource.appID = decodeBase64(fetchSource.appID);
+				}
+				if (fetchSource.appSecret) {
+					fetchSource.appSecret = decodeBase64(fetchSource.appSecret);
+				}
 			});
 			return importedFetchSourceArray;
 		} catch (error) {
@@ -294,6 +314,15 @@ class FetchSourceSettingsTab extends PluginSettingTab {
 				};
 				// 移除id属性,因为新复制的fetchSource需要新的id
 				delete fetchSourceCopy.id;
+				// 复制时apiKey进行base64编码
+				if (fetchSourceCopy.appID) {
+					fetchSourceCopy.appID = encodeBase64(fetchSourceCopy.appID);
+				}
+				if (fetchSourceCopy.appSecret) {
+					fetchSourceCopy.appSecret = encodeBase64(
+						fetchSourceCopy.appSecret
+					);
+				}
 
 				// 将fetchSource对象放入数组中
 				const fetchSourceArray = [fetchSourceCopy];
