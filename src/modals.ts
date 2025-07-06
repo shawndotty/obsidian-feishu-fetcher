@@ -1,5 +1,5 @@
 import { Modal, Setting, setIcon } from "obsidian";
-import { t } from "../lang/helpers";
+import { t } from "./lang/helpers";
 import { FetchSourceSetting } from "./types";
 
 export class FetchSourceEditModal extends Modal {

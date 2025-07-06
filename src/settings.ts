@@ -6,10 +6,10 @@ import {
 	Notice,
 	setIcon,
 } from "obsidian";
-import { t } from "../lang/helpers";
+import { t } from "./lang/helpers";
 import { encodeBase64, decodeBase64 } from "./utils";
 import { FetchSourceSetting } from "./types";
-import ObDBFetcher from "../main";
+import ObDBFetcher from "./main";
 import { FetchSourceEditModal } from "./modals";
 
 // 将 FetchSourceSettingsTab 类从 main.ts 移动到此处

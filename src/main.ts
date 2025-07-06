@@ -1,9 +1,9 @@
 import { Notice, Plugin } from "obsidian";
 import { t } from "./lang/helpers";
-import { encodeBase64, decodeBase64 } from "./src/utils";
-import { FetchSourceSetting, ObFeishuFetcherSettings } from "./src/types";
-import FetchSourceSettingsTab from "./src/settings";
-import FeishuFetcher from "./src/feishu-fetcher";
+import { encodeBase64, decodeBase64 } from "./utils";
+import { FetchSourceSetting, ObFeishuFetcherSettings } from "./types";
+import FetchSourceSettingsTab from "./settings";
+import FeishuFetcher from "./feishu-fetcher";
 
 // 扩展 App 类型以包含 commands 属性
 declare module "obsidian" {
